@@ -1,8 +1,8 @@
 'use strict';
 
 var DMX = require('DMX');
-let ndDMX = require('./ndDMX');
-let dmxTypes = require('./ndDMXTypes');
+let ndDMX = require('./lib/ndDMX');
+let dmxTypes = require('./lib/ndDMXTypes');
 let ws = require('nodejs-websocket');
 
 let port = 1338;
@@ -63,6 +63,9 @@ let test_input = [
   125, 0, 0,
   0, 255, 50
 ];
+
+
+
 
 
 /**
