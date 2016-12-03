@@ -1,0 +1,24 @@
+{
+  "name": "nerdV-DMX512",
+  "version": "0.0.1",
+  "description": "The child of NERDDISCO & modV to control a DMX512 universe",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Tim Pietrusky <timpietrusky@gmail.com> (http://timpietrusky.com/)",
+  "license": "MIT",
+  "dependencies": {
+    "dmx": "0.0.4",
+    "nodejs-websocket": "^1.7.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/TimPietrusky/nerdV-DMX512.git"
+  },
+  "bugs": {
+    "url": "https://github.com/NERDDISCO/nerdV-DMX512/issues"
+  },
+  "homepage": "https://github.com/NERDDISCO/nerdV-DMX512"
+}
