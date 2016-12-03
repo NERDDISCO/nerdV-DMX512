@@ -5,7 +5,7 @@ let ndDMX = require('./lib/ndDMX');
 let dmxTypes = require('./lib/ndDMXTypes');
 let ws = require('nodejs-websocket');
 
-let port = 1338;
+let port = 1337;
 let debug = true;
 
 /*
@@ -56,27 +56,18 @@ dmx_connector.updateAll(universe.name, 0);
 let NERDDISCO_dmx = new ndDMX({ devices : universe.slaves });
 
 
-/*
- * Testing
- */
-let test_input = [
-  125, 0, 0,
-  0, 255, 50
-];
-
-
 
 
 
 /**
  * Create a WebSocket server
  */
-let server = ws.createServer(function (conn) {
+ let server = ws.createServer(function (connection) {
 
     console.log('New connection');
 
     // Receive data
-    conn.on('text', function (data) {
+    connection.on('text', function (data) {
       if (debug) {
         console.log(data);
       }
@@ -86,9 +77,9 @@ let server = ws.createServer(function (conn) {
       /*
        * Update DMX devices
        */
-      NERDDISCO_dmx.updateDevice(universe.slaves.light1, test_input.slice(0, 3));
-      NERDDISCO_dmx.updateDevice(universe.slaves.light2, test_input.slice(3, 6));
-      NERDDISCO_dmx.updateDevice(universe.slaves.fogMaschine, false);
+      NERDDISCO_dmx.updateDevice(universe.slaves.light1, data.slice(0, 3));
+      NERDDISCO_dmx.updateDevice(universe.slaves.light2, data.slice(3, 6));
+      NERDDISCO_dmx.updateDevice(universe.slaves.fogMaschine, data.slice(6, 7));
 
       if (debug) {
         console.log(NERDDISCO_dmx.data);
@@ -99,9 +90,18 @@ let server = ws.createServer(function (conn) {
     });
 
 
+    
+    connection.on('close', function (code, reason) {
+      console.log('Connection closed');
+    });
 
-    conn.on('close', function (code, reason) {
-        console.log('Connection closed');
+
+
+    connection.on('error', function (error) {
+      if (error.code !== 'ECONNRESET') {
+        // Ignore ECONNRESET and re throw anything else
+        throw err;
+      }
     });
 
 }).listen(port);
