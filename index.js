@@ -12,7 +12,7 @@ let debug = true;
  * Configure the universe
  */
 let universe = {
-    name : 'dotjs',
+    name : 'nye2016',
 
     master : {
       driver : 'enttec-usb-dmx-pro',
@@ -20,20 +20,40 @@ let universe = {
     },
 
     slaves : {
-      light1 : {
-        type : dmxTypes.TYPE_STAIRVILLE_LED_PAR,
-        address : 1
+      // 'starburst' : {
+      //   type : dmxTypes.ADJ_STARBURST,
+      //   address : 1,
+      //   channels : 12
+      // },
+      //
+      // 'ledBar' : {
+      //   type : dmxTypes.CAMEO_PIXBAR_600_PRO,
+      //   address : 13,
+      //   channels : 74
+      // },
+
+      // 'fogMaschine' : {
+      //   type : dmxTypes.TYPE_STAIRVILLE_S_150,
+      //   address : 511,
+      //   channels : 1
+      // },
+
+      'bubbleMachine' : {
+        type : dmxTypes.EUROLITE_B_100,
+        address : 16,
+        channels : 2
       },
 
-      light2 : {
-        type : dmxTypes.TYPE_STAIRVILLE_LED_PAR,
-        address : 4
+      'light1' : {
+        type : dmxTypes.TYPE_CAMEO_LED_PAR,
+        address : 100
       },
 
-      fogMaschine : {
-        type : dmxTypes.TYPE_STAIRVILLE_S_150,
-        address : 16
-      }
+      'light2' : {
+        type : dmxTypes.TYPE_CAMEO_LED_PAR,
+        address : 108
+      },
+
     }
 };
 
@@ -50,14 +70,8 @@ dmx_connector.addUniverse(
 // Reset every device at startup
 dmx_connector.updateAll(universe.name, 0);
 
-
-
 // Initialize NERDDISCO DMX helper
 let NERDDISCO_dmx = new ndDMX({ devices : universe.slaves });
-
-
-
-
 
 /**
  * Create a WebSocket server
@@ -67,30 +81,54 @@ let NERDDISCO_dmx = new ndDMX({ devices : universe.slaves });
     console.log('New connection');
 
     // Receive data
-    connection.on('text', function (data) {
+    connection.on('text', function (dmxData) {
       if (debug) {
-        console.log(data);
+        console.log(dmxData);
       }
 
-      data = JSON.parse(data);
+      dmxData = JSON.parse(dmxData);
+
+      if (dmxData._type === 'nerdVCommander') {
+        NERDDISCO_dmx.fog = dmxData.fog;
+        NERDDISCO_dmx.bubbles = dmxData.bubbles;
+        NERDDISCO_dmx.uv = dmxData.uv;
+        NERDDISCO_dmx.dimmer = dmxData.dimmer;
+        NERDDISCO_dmx.pixel_off = dmxData.pixel_off;
+        NERDDISCO_dmx.strobe = dmxData.strobe;
+        NERDDISCO_dmx.strobe_frequency = dmxData.strobe_frequency;
+        NERDDISCO_dmx.rotation = dmxData.rotation;
+        NERDDISCO_dmx.rotation_speed = dmxData.rotation_speed;
+
+      } else {
+        NERDDISCO_dmx.pixel = dmxData.average;
+      }
 
       /*
        * Update DMX devices
        */
-      NERDDISCO_dmx.updateDevice(universe.slaves.light1, data.slice(0, 3));
-      NERDDISCO_dmx.updateDevice(universe.slaves.light2, data.slice(3, 6));
-      NERDDISCO_dmx.updateDevice(universe.slaves.fogMaschine, data.slice(6, 7));
+      //  NERDDISCO_dmx.updateDevice(universe.slaves.ledBar, []);
+      //  NERDDISCO_dmx.updateDevice(universe.slaves.starburst, []);
+       NERDDISCO_dmx.updateDevice(universe.slaves.light1, []);
+       NERDDISCO_dmx.updateDevice(universe.slaves.light2, []);
+      //  NERDDISCO_dmx.updateDevice(universe.slaves.fogMaschine, []);
+       NERDDISCO_dmx.updateDevice(universe.slaves.bubbleMachine, []);
 
-      if (debug) {
-        console.log(NERDDISCO_dmx.data);
-      }
+       if (debug) {
+         console.log(JSON.stringify(NERDDISCO_dmx.data));
+       }
 
       // Update the universe
       dmx_connector.update(universe.name, NERDDISCO_dmx.data);
     });
 
+    function broadcast(server, msg) {
+    server.connections.forEach(function (conn) {
+        conn.sendText(msg)
+    })
+  }
 
-    
+
+
     connection.on('close', function (code, reason) {
       console.log('Connection closed');
     });

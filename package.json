@@ -10,6 +10,7 @@
   "author": "Tim Pietrusky <timpietrusky@gmail.com> (http://timpietrusky.com/)",
   "license": "MIT",
   "dependencies": {
+    "color": "^1.0.3",
     "dmx": "0.0.4",
     "nodejs-websocket": "^1.7.0"
   },
